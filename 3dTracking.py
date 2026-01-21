@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 #Here is a fancy comment that is testing out GIT
 # 1. Load Calibration Data
-with np.load('calibration_data.npz') as data:
+with np.load('calibration_data.npz') as data: #change directory if needed for testing
     mtx = data['mtx']
     dist = data['dist']
 
@@ -49,8 +49,8 @@ while True:
             x, y, z = tvec.flatten()
             
             # Print data to console
-            # print(f"ID: {ids[i][0]} | Pos (m): X={x:.3f}, Y={y:.3f}, Z={z:.3f}")
-            print(tvec)
+            print(f"ID: {ids[i][0]} | Pos (m): X={x:.3f}, Y={y:.3f}, Z={z:.3f}")
+            # print(tvec)
             print("")
             # 6. Draw 3D Axes on the Marker
             # 0.03 is the length of the axes lines in meters
