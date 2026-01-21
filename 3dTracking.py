@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 #Here is a fancy comment that is testing out GIT
 # 1. Load Calibration Data
 with np.load('calibration_data.npz') as data: #change directory if needed for testing
@@ -26,6 +27,17 @@ obj_points = np.array([
 cap = cv2.VideoCapture(0) # Change 0 to your camera index if needed
 
 print("Starting detection. Press 'q' to exit.")
+
+#Error + Velocity Tracking
+
+TRUE_DISTANCE = 0.5  # meters (change to marker spacing)
+
+measured_distances = []
+distance_errors = []
+
+velocities = []
+velocity_errors = []
+prev_pos = None
 
 while True:
     ret, frame = cap.read()
@@ -87,6 +99,29 @@ while True:
         # Draw a line between the two markers
         cv2.line(frame, marker_centers[id1], marker_centers[id2], (0, 255, 255), 3)
 
+        # Error tracking
+        error = abs(distance - TRUE_DISTANCE)
+        measured_distances.append(distance)
+        distance_errors.append(error) 
+
+        #Velocity tracking
+        fps = cap.get(cv2.CAP_PROP_FPS) #gets the frames per sec
+
+        if fps != 0:    #calculates time between frames
+            dt = 1 / fps
+        else:  
+            print("if didn't report fps right then just assume 30fps")
+            dt = 1/30
+        
+        # choose marker 1 for velocity
+        p = p1
+
+        if prev_pos is not None:
+            vel_vec = (p - prev_pos) / dt  #velocity vecotr (dif in position / time)
+            vel_mag = np.linalg.norm(vel_vec) #convert velocity vector into a scalar speed (magnitude)
+            velocities.append(vel_mag)
+
+        prev_pos = p
 
         cv2.putText(frame, "Distance: " + str(round(distance, 2)) + " m", (50, 50),
             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
@@ -99,3 +134,30 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+
+#all the error and velocity stats
+print("Distance stats:")
+print("Mean Distance:", np.mean(measured_distances))
+print("Std Dev:", np.std(measured_distances))
+print("Max Distance:", np.max(measured_distances))
+print("Min Distance:", np.min(measured_distances))
+
+print("Velocity stats:")
+print("Mean Speed:", np.mean(velocities))
+print("Std Dev:", np.std(velocities))
+print("Max Speed:", np.max(velocities))
+print("Min Speed:", np.min(velocities))
+
+
+# plot cast
+plt.plot(measured_distances)
+plt.title("Measured Distance Over Time")
+plt.xlabel("Frame Index")
+plt.ylabel("Distance (m)")
+plt.show()
+
+plt.plot(velocities)
+plt.title("Velocity Over Time")
+plt.xlabel("Frame Index")
+plt.ylabel("Speed (m/s)")
+plt.show()
