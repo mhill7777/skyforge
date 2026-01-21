@@ -35,6 +35,8 @@ while True:
     # Detect 2D Markers
     corners, ids, rejected = detector.detectMarkers(frame)
 
+    marker_positions = {}   # stores tvecs by marker ID for distance between markers
+
     if ids is not None:
         # Draw 2D green boxes and IDs
         cv2.aruco.drawDetectedMarkers(frame, corners, ids)
@@ -58,6 +60,23 @@ while True:
             # Optional: Display Z-distance on the video frame
             cv2.putText(frame, f"Z: {z:.2f}m", (int(corners[i][0][0][0]), int(corners[i][0][0][1]) - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 255, 0), 2)
+            
+            marker_positions[ids[i][0]] = tvec.flatten()
+
+    #code to get distance between 2 markers
+    if len(marker_positions) >= 2:
+        ids_list = list(marker_positions.keys()) #each key is marker id and value is 3d position
+        id1, id2 = ids_list[0], ids_list[1]
+
+        p1 = marker_positions[id1] #3d position vector
+        p2 = marker_positions[id2]
+
+        distance = np.linalg.norm(p1 - p2) #linalg.norm computes euclidean length
+
+        print(f"Distance between marker {id1} and {id2}: {distance:.3f} m")
+
+        cv2.putText(frame, "Distance: " + str(round(distance, 2)) + " m", (50, 50),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
     # Show live video feed
     cv2.imshow("ArUco 3D Tracking", frame)
