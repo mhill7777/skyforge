@@ -13,7 +13,7 @@ parameters = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
 # 3. Define Physical Marker Geometry
-MARKER_SIZE = 0.05057  # Actual side length in meters (e.g., 5cm)
+MARKER_SIZE = 0.05089  # Actual side length in meters (e.g., 5cm)
 # Object points for a square marker centered at (0,0,0)
 obj_points = np.array([
     [-MARKER_SIZE / 2,  MARKER_SIZE / 2, 0],
@@ -36,6 +36,8 @@ while True:
     corners, ids, rejected = detector.detectMarkers(frame)
 
     marker_positions = {}   # stores tvecs by marker ID for distance between markers
+    marker_centers = {}     # stores center pixel location for drawing a line
+
 
     if ids is not None:
         # Draw 2D green boxes and IDs
@@ -63,6 +65,13 @@ while True:
             
             marker_positions[ids[i][0]] = tvec.flatten()
 
+            # Store marker center in pixels (for line drawing)
+            c = corners[i][0]
+            center_x = int(np.mean(c[:, 0]))
+            center_y = int(np.mean(c[:, 1]))
+            marker_centers[ids[i][0]] = (center_x, center_y)
+
+
     #code to get distance between 2 markers
     if len(marker_positions) >= 2:
         ids_list = list(marker_positions.keys()) #each key is marker id and value is 3d position
@@ -74,6 +83,10 @@ while True:
         distance = np.linalg.norm(p1 - p2) #linalg.norm computes euclidean length
 
         print(f"Distance between marker {id1} and {id2}: {distance:.3f} m")
+
+        # Draw a line between the two markers
+        cv2.line(frame, marker_centers[id1], marker_centers[id2], (0, 255, 255), 3)
+
 
         cv2.putText(frame, "Distance: " + str(round(distance, 2)) + " m", (50, 50),
             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
