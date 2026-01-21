@@ -5,10 +5,10 @@ import os
 # --- 1. SETTINGS ---
 # Use the exact dimensions you used to print your board
 CHARUCO_BOARD = cv2.aruco.CharucoBoard(
-    size=(11, 8),          # Number of squares (width, height)
-    squareLength=0.02057,#0.03,    # Side length of squares (e.g., 0.03 for 30mm)
-    markerLength=0.01495,#0.02,    # Side length of markers (e.g., 0.02 for 20mm)
-    dictionary=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+    size=(9, 6),          # Number of squares (width, height)
+    squareLength=0.02718,#0.02057,#0.03,    # Side length of squares (e.g., 0.03 for 30mm)
+    markerLength=0.02032,#0.01495,#0.02,    # Side length of markers (e.g., 0.02 for 20mm)
+    dictionary=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
 )
 
 # Initialize the detector
@@ -19,8 +19,8 @@ all_charuco_corners = []
 all_charuco_ids = []
 image_size = None
 
-image_folder = "CalibrationImages/"
-image_files = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(".jpg")]
+image_folder = "../CalibrationImages/"
+image_files = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(".png")]
 
 for file in image_files:
     img = cv2.imread(file)
@@ -53,7 +53,7 @@ if len(all_charuco_corners) > 10:
     print(f"Calibration Complete. Reprojection Error: {ret:.4f}")
     
     # Save the parameters for your ArUco detection script
-    np.savez("calibration_data.npz", mtx=mtx, dist=dist)
-    print("Files saved to 'calibration_data.npz'")
+    np.savez("calibration_data2.npz", mtx=mtx, dist=dist)
+    print("Files saved to 'calibration_data2.npz'")
 else:
     print("Error: Not enough valid images found for calibration.")

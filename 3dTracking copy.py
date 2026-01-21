@@ -17,7 +17,7 @@ MARKER_SIZE = 0.05057  # Actual side length in meters (e.g., 5cm)
 # Object points for a square marker centered at (0,0,0)
 obj_points = np.array([
     [-MARKER_SIZE / 2,  MARKER_SIZE / 2, 0],
-    [ MARKER_SIZE / 2,  MARKER_SIZE / 2, 0],
+    [ MARKER_SIZE / 2,  MARKER_SIZE / 2, 0], 
     [ MARKER_SIZE / 2, -MARKER_SIZE / 2, 0],
     [-MARKER_SIZE / 2, -MARKER_SIZE / 2, 0]
 ], dtype=np.float32)
