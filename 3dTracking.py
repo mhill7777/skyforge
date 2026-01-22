@@ -117,7 +117,7 @@ while True:
         p = p1
 
         if prev_pos is not None:
-            vel_vec = (p - prev_pos) / dt  #velocity vecotr (dif in position / time)
+            vel_vec = (p - prev_pos) / dt  #velocity vector (dif in position / time)
             vel_mag = np.linalg.norm(vel_vec) #convert velocity vector into a scalar speed (magnitude)
             velocities.append(vel_mag)
 
@@ -135,19 +135,29 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
+# RMSE CALCULATIONS
+rmse_dist = np.sqrt(np.mean(np.square(distance_errors))) #how far off distance estimates usually are(spacial accuracy)
+
+# Only compute velocity RMSE if errors exist
+if len(velocity_errors) > 0:
+    rmse_vel = np.sqrt(np.mean(np.square(velocity_errors)))  #how far off velocity estimates usually are(motion accuracy)
+else:
+    rmse_vel = None
+
+time_axis = np.arange(len(velocities)) * dt
+
+
 #all the error and velocity stats
-print("Distance stats:")
-print("Mean Distance:", np.mean(measured_distances))
-print("Std Dev:", np.std(measured_distances))
-print("Max Distance:", np.max(measured_distances))
-print("Min Distance:", np.min(measured_distances))
+# print("Distance stats:")
+# print("Mean Distance:", np.mean(measured_distances))
+# print("Std Dev:", np.std(measured_distances))
+# print("Max Distance:", np.max(measured_distances))
+# print("Min Distance:", np.min(measured_distances))
 
-print("Velocity stats:")
-print("Mean Speed:", np.mean(velocities))
-print("Std Dev:", np.std(velocities))
-print("Max Speed:", np.max(velocities))
-print("Min Speed:", np.min(velocities))
-
+# print("Velocity stats:")
+# print("Mean Speed:", np.mean(velocities))
+# print("Std Dev:", np.std(velocities))
+# print("Max Speed:", np.max(velocities))
 
 # plot cast
 plt.plot(measured_distances)
@@ -156,8 +166,34 @@ plt.xlabel("Frame Index")
 plt.ylabel("Distance (m)")
 plt.show()
 
-plt.plot(velocities)
-plt.title("Velocity Over Time")
-plt.xlabel("Frame Index")
+plt.plot(time_axis, velocities)
+plt.title("Velocity vs Time")
+plt.xlabel("Time (s)")
 plt.ylabel("Speed (m/s)")
 plt.show()
+
+
+with open("results.txt", "w") as f:
+    f.write("Distance Error Metrics\n")
+    f.write(f"Mean Error: {np.mean(distance_errors):.4f} m\n")
+    f.write(f"RMSE: {rmse_dist:.4f} m\n")
+    f.write(f"Std Dev: {np.std(distance_errors):.4f} m\n")
+    f.write(f"Max Error: {np.max(distance_errors):.4f} m\n")
+    f.write(f"Min Error: {np.min(distance_errors):.4f} m\n\n")
+
+    f.write("Velocity Metrics\n")
+    f.write(f"Mean Velocity: {np.mean(velocities):.4f} m/s\n")
+    f.write(f"Std Dev: {np.std(velocities):.4f} m/s\n")
+    f.write(f"Max Velocity: {np.max(velocities):.4f} m/s\n")
+    f.write(f"Min Velocity: {np.min(velocities):.4f} m/s\n")
+
+    if rmse_vel is not None:
+        f.write(f"Velocity RMSE: {rmse_vel:.4f} m/s\n")
+    else:
+        f.write("Velocity RMSE: N/A (no ground truth)\n")
+
+    f.write("\nTiming Info\n")
+    f.write(f"Estimated FPS: {fps}\n")
+    f.write(f"Delta Time (s): {dt:.4f}\n")
+    f.write(f"Total Velocity Samples: {len(velocities)}\n")
+
