@@ -1,7 +1,16 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-#Here is a fancy comment that is testing out GIT
+import math
+
+
+numMetricDisplay=1
+def displayMetric(metric, value, unit="m"):
+    global numMetricDisplay
+    cv2.putText(frame, metric+": " + str(value) + " "+unit, (50,numMetricDisplay*50),
+        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    numMetricDisplay+=1
+
 # 1. Load Calibration Data
 with np.load('calibration_data2.npz') as data: #change directory if needed for testing
     mtx = data['mtx']
@@ -40,6 +49,7 @@ velocity_errors = []
 prev_pos = None
 
 while True:
+    numMetricDisplay=1#for printing information on their own rows
     ret, frame = cap.read()
     if not ret:
         break
@@ -58,6 +68,13 @@ while True:
         for i in range(len(ids)):
             # 5. Estimate 3D Pose using solvePnP
             _, rvec, tvec = cv2.solvePnP(obj_points, corners[i], mtx, dist, False, cv2.SOLVEPNP_IPPE_SQUARE)
+            
+            rotationsVal=rvec.flatten()
+            displayMetric("id",ids[i])
+            displayMetric("r1",rotationsVal[0]*(180/math.pi))
+            displayMetric("r2",rotationsVal[1]*(180/math.pi))
+            displayMetric("r3",rotationsVal[2]*(180/math.pi))
+            print(rvec)
 
             # Extract Position (Translation Vector)
             x, y, z = tvec.flatten()
@@ -127,9 +144,10 @@ while True:
             velocities.append(vel_mag)
 
         prev_pos = p
-        def displayText():
-            cv2.putText(frame, "Distance: " + str(round(distance, 4)) + " m", (50, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+        step = 50
+        
+
+        displayMetric("distance",round(distance, 4))
 
     # Show live video feed
     cv2.imshow("ArUco 3D Tracking", frame)
