@@ -1,18 +1,18 @@
-=== Distance Error Metrics ===
-Mean Error: 0.4264 m
-RMSE: 0.4264 m
-Std Dev: 0.0029 m
-Max Error: 0.4309 m
-Min Error: 0.4195 m
+Distance Error Metrics
+Mean Error: 0.0449 m
+RMSE: 0.0450 m
+Std Dev: 0.0025 m
+Max Error: 0.0589 m
+Min Error: 0.0406 m
 
-=== Velocity Metrics ===
-Mean Velocity: 0.1091 m/s
-Std Dev: 0.3685 m/s
-Max Velocity: 2.1946 m/s
+Velocity Metrics
+Mean Velocity: 0.0238 m/s
+Std Dev: 0.0802 m/s
+Max Velocity: 1.0204 m/s
 Min Velocity: 0.0000 m/s
 Velocity RMSE: N/A (no ground truth)
 
-=== Timing Info ===
-Estimated FPS: 30.0
-Delta Time (s): 0.0333
-Total Velocity Samples: 99
+Timing Info
+Estimated FPS: 5.0
+Delta Time (s): 0.2000
+Total Velocity Samples: 1284
