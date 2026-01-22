@@ -30,7 +30,7 @@ print("Starting detection. Press 'q' to exit.")
 
 #Error + Velocity Tracking
 
-TRUE_DISTANCE = 0.5  # meters (change to marker spacing)
+TRUE_DISTANCE = 0.0581  # meters (change to marker spacing)
 
 measured_distances = []
 distance_errors = []
@@ -122,9 +122,9 @@ while True:
             velocities.append(vel_mag)
 
         prev_pos = p
-
-        cv2.putText(frame, "Distance: " + str(round(distance, 4)) + " m", (50, 50),
-            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+        def displayText():
+            cv2.putText(frame, "Distance: " + str(round(distance, 4)) + " m", (50, 50),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
     # Show live video feed
     cv2.imshow("ArUco 3D Tracking", frame)
