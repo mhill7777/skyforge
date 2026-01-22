@@ -83,6 +83,11 @@ while True:
             center_y = int(np.mean(c[:, 1]))
             marker_centers[ids[i][0]] = (center_x, center_y)
 
+            cv2.putText(frame, f"ID: {ids[i][0]}", (center_x, center_y),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+
+
 
     #code to get distance between 2 markers
     if len(marker_positions) >= 2:
