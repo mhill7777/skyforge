@@ -182,12 +182,42 @@ time_axis = np.arange(len(velocities)) * dt
 # print("Std Dev:", np.std(velocities))
 # print("Max Speed:", np.max(velocities))
 
+# print("measured_distance")
+# print(measured_distances)
+# print("time_axis")
+# print(time_axis)
+# print("velocities")
+# print(velocities)
+
 # plot cast
+numOfMeasurements=range(len(measured_distances))
+targetValue=TRUE_DISTANCE+MARKER_SIZE
+tolerance = 0.0005
+upper_bound = targetValue + tolerance
+lower_bound = targetValue - tolerance
+fig, ax = plt.subplots()
 plt.plot(measured_distances)
+# 2. Plot the target value line
+ax.axhline(targetValue, color='red', linestyle='--', linewidth=2, label='Target Value')
+
+# 3. Plot the upper and lower tolerance lines (optional, can be done implicitly with fill_between)
+ax.axhline(upper_bound, color='gray', linestyle=':', linewidth=1, label='Tolerance Limit')
+ax.axhline(lower_bound, color='gray', linestyle=':', linewidth=1)
+
+# 4. Shade the tolerance band
+ax.fill_between(
+    numOfMeasurements,
+    lower_bound,
+    upper_bound,
+    color='red',
+    alpha=0.2, # Adjust transparency
+    label='Tolerance Range'
+)
 plt.title("Measured Distance Over Time")
 plt.xlabel("Frame Index")
 plt.ylabel("Distance (m)")
 plt.show()
+
 
 plt.plot(time_axis, velocities)
 plt.title("Velocity vs Time")
