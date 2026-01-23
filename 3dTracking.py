@@ -34,7 +34,7 @@ obj_points = np.array([
 
 # 4. Start Video Feed
 cap = cv2.VideoCapture(0) # Change 0 to your camera index if needed
-
+ 
 print("Starting detection. Press 'q' to exit.")
 
 #Error + Velocity Tracking
@@ -71,13 +71,17 @@ while True:
             
             rotationsVal=rvec.flatten()
             displayMetric("id",ids[i])
-            displayMetric("r1",rotationsVal[0]*(180/math.pi))
-            displayMetric("r2",rotationsVal[1]*(180/math.pi))
-            displayMetric("r3",rotationsVal[2]*(180/math.pi))
+            displayMetric("r1",rotationsVal[0]*(180/math.pi),"")
+            displayMetric("r2",rotationsVal[1]*(180/math.pi),"")
+            displayMetric("r3",rotationsVal[2]*(180/math.pi),"")
             print(rvec)
+
 
             # Extract Position (Translation Vector)
             x, y, z = tvec.flatten()
+            displayMetric("x",x)
+            displayMetric("y",y)
+            displayMetric("z",z)
             
             # Print data to console
             print(f"ID: {ids[i][0]} | Pos (m): X={x:.3f}, Y={y:.3f}, Z={z:.3f}")
