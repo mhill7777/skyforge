@@ -70,17 +70,10 @@ while True:
             _, rvec, tvec = cv2.solvePnP(obj_points, corners[i], mtx, dist, False, cv2.SOLVEPNP_IPPE_SQUARE)
             
             rotationsVal=rvec.flatten()
-<<<<<<< HEAD
-            #displayMetric("id",ids[i])
-            #displayMetric("r1",rotationsVal[0]*(180/math.pi))
-            #displayMetric("r2",rotationsVal[1]*(180/math.pi))
-            #displayMetric("r3",rotationsVal[2]*(180/math.pi))
-=======
             displayMetric("id",ids[i])
             displayMetric("r1",rotationsVal[0]*(180/math.pi),"")
             displayMetric("r2",rotationsVal[1]*(180/math.pi),"")
             displayMetric("r3",rotationsVal[2]*(180/math.pi),"")
->>>>>>> 5d03d6a9f363c9c69561a6e1e8ce76b7d6e8bc7f
             print(rvec)
 
 
@@ -208,23 +201,23 @@ time_axis = np.arange(len(velocities)) * dt
 
 
 #all the error and velocity stats
-# print("Distance stats:")
-# print("Mean Distance:", np.mean(measured_distances))
-# print("Std Dev:", np.std(measured_distances))
-# print("Max Distance:", np.max(measured_distances))
-# print("Min Distance:", np.min(measured_distances))
+print("Distance stats:")
+print("Mean Distance:", np.mean(measured_distances))
+print("Std Dev:", np.std(measured_distances))
+print("Max Distance:", np.max(measured_distances))
+print("Min Distance:", np.min(measured_distances))
 
-# print("Velocity stats:")
-# print("Mean Speed:", np.mean(velocities))
-# print("Std Dev:", np.std(velocities))
-# print("Max Speed:", np.max(velocities))
+print("Velocity stats:")
+print("Mean Speed:", np.mean(velocities))
+print("Std Dev:", np.std(velocities))
+print("Max Speed:", np.max(velocities))
 
-# print("measured_distance")
-# print(measured_distances)
-# print("time_axis")
-# print(time_axis)
-# print("velocities")
-# print(velocities)
+print("measured_distance")
+print(measured_distances)
+print("time_axis")
+print(time_axis)
+print("velocities")
+print(velocities)
 
 # plot cast
 numOfMeasurements=range(len(measured_distances))
