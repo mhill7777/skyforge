@@ -63,7 +63,7 @@ while True:
 
     if ids is not None:
         # Draw 2D green boxes and IDs
-        cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        cv2.aruco.drawDetectedMarkers(frame, corners)
 
         for i in range(len(ids)):
             # 5. Estimate 3D Pose using solvePnP
@@ -91,21 +91,36 @@ while True:
             # 0.03 is the length of the axes lines in meters
             cv2.drawFrameAxes(frame, mtx, dist, rvec, tvec, 0.03)
             
-
-            # Optional: Display Z-distance on the video frame
-            cv2.putText(frame, f"Z: {z:.2f}m", (int(corners[i][0][0][0]), int(corners[i][0][0][1]) - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 255, 0), 2)
-            
             marker_positions[ids[i][0]] = tvec.flatten()
 
-            # Store marker center in pixels (for line drawing)
+            # Store marker center in pixels (for line drawing/all drawings)
             c = corners[i][0]
             center_x = int(np.mean(c[:, 0]))
             center_y = int(np.mean(c[:, 1]))
             marker_centers[ids[i][0]] = (center_x, center_y)
 
-            cv2.putText(frame, f"ID: {ids[i][0]}", (center_x, center_y),
-            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            # Compute pixel width/height
+            width_px  = np.linalg.norm(c[0] - c[1])
+            height_px = np.linalg.norm(c[1] - c[2])
+
+            # Convert to meters
+            z = tvec[2][0]
+            fx = mtx[0, 0]
+            fy = mtx[1, 1]
+
+            width_m  = (width_px  * z) / fx
+            height_m = (height_px * z) / fy
+
+            cv2.putText(frame, f"ID: {ids[i][0]}", 
+                        (center_x, center_y - 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+            cv2.putText(frame, f"Z: {z:.2f} m", 
+                        (center_x, center_y + 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+            cv2.putText(frame, f"Size: {width_m:.3f}m", (center_x, center_y + 30),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
 
 
 
@@ -118,16 +133,27 @@ while True:
         p1 = marker_positions[id1] #3d position vector
         p2 = marker_positions[id2]
 
-        distance = np.linalg.norm(p1 - p2) #linalg.norm computes euclidean length
+       # Component-wise distances (how far apart 2 markers against each axis)
+        dx = p2[0] - p1[0]
+        dy = p2[1] - p1[1]
+        dz = p2[2] - p1[2]
 
-        print(f"Distance between marker {id1} and {id2}: {distance:.3f} m")
+        xy_distance = np.sqrt(dx**2 + dy**2) #planar distance, ignore depth
+        z_distance = abs(dz) #how much farther from camera is one marker than other
+        distance_3d = np.sqrt(dx**2 + dy**2 + dz**2) #physical distance between markers (euclidean)
+
+
+        displayMetric("Planar Dist", round(xy_distance, 4), "m")
+        displayMetric("Depth Dist", round(z_distance, 4), "m")
+        displayMetric("True Spacial Dist", round(distance_3d, 4), "m")
+
 
         # Draw a line between the two markers
-        cv2.line(frame, marker_centers[id1], marker_centers[id2], (0, 255, 255), 4)
+        #cv2.line(frame, marker_centers[id1], marker_centers[id2], (0, 255, 255), 4)
 
         # Error tracking
-        error = abs(distance - TRUE_DISTANCE)
-        measured_distances.append(distance)
+        error = abs(distance_3d - TRUE_DISTANCE)
+        measured_distances.append(distance_3d)
         distance_errors.append(error) 
 
         #Velocity tracking
@@ -151,7 +177,7 @@ while True:
         step = 50
         
 
-        displayMetric("distance",round(distance, 4))
+        displayMetric("distance",round(distance_3d, 4))
 
     # Show live video feed
     cv2.imshow("ArUco 3D Tracking", frame)
@@ -175,23 +201,23 @@ time_axis = np.arange(len(velocities)) * dt
 
 
 #all the error and velocity stats
-# print("Distance stats:")
-# print("Mean Distance:", np.mean(measured_distances))
-# print("Std Dev:", np.std(measured_distances))
-# print("Max Distance:", np.max(measured_distances))
-# print("Min Distance:", np.min(measured_distances))
+print("Distance stats:")
+print("Mean Distance:", np.mean(measured_distances))
+print("Std Dev:", np.std(measured_distances))
+print("Max Distance:", np.max(measured_distances))
+print("Min Distance:", np.min(measured_distances))
 
-# print("Velocity stats:")
-# print("Mean Speed:", np.mean(velocities))
-# print("Std Dev:", np.std(velocities))
-# print("Max Speed:", np.max(velocities))
+print("Velocity stats:")
+print("Mean Speed:", np.mean(velocities))
+print("Std Dev:", np.std(velocities))
+print("Max Speed:", np.max(velocities))
 
-# print("measured_distance")
-# print(measured_distances)
-# print("time_axis")
-# print(time_axis)
-# print("velocities")
-# print(velocities)
+print("measured_distance")
+print(measured_distances)
+print("time_axis")
+print(time_axis)
+print("velocities")
+print(velocities)
 
 # plot cast
 numOfMeasurements=range(len(measured_distances))

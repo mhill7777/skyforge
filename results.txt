@@ -1,18 +1,18 @@
 Distance Error Metrics
-Mean Error: 0.0430 m
-RMSE: 0.0430 m
-Std Dev: 0.0004 m
-Max Error: 0.0444 m
-Min Error: 0.0415 m
+Mean Error: 0.1276 m
+RMSE: 0.1380 m
+Std Dev: 0.0527 m
+Max Error: 0.2444 m
+Min Error: 0.0401 m
 
 Velocity Metrics
-Mean Velocity: 0.0304 m/s
-Std Dev: 0.0251 m/s
-Max Velocity: 0.1237 m/s
+Mean Velocity: 0.1786 m/s
+Std Dev: 0.4567 m/s
+Max Velocity: 3.1494 m/s
 Min Velocity: 0.0000 m/s
 Velocity RMSE: N/A (no ground truth)
 
 Timing Info
-Estimated FPS: 15.0
-Delta Time (s): 0.0667
-Total Velocity Samples: 107
+Estimated FPS: 30.0
+Delta Time (s): 0.0333
+Total Velocity Samples: 99
