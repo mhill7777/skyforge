@@ -329,18 +329,19 @@ df = pd.DataFrame(results)
 #--------------------------------------------------------------------
 setDistanceOnMeterStick=0.5 #where the fiducial is on the meter stick in meters
 depthBetweenFiducials=0.5 #the distance bewteen fiducials, used for measuring depth in meters
-x_targetValue=0.5
-y_targetValue=0.5
-z_targetValue=0.5
+# x_targetValue=0.5
+# y_targetValue=0.5
+# z_targetValue=0.5
 
-plot_VS_TargetValue(measured_distances,TRUE_DISTANCE+MARKER_SIZE,"Measured Distance Over Time","Distance (m)")
+plot_VS_TargetValue(measured_distances,TRUE_DISTANCE+MARKER_SIZE,"Measured Distance Over Time","Distance (m)")#two fiducials
 plot_VS_TargetValue(trackDepth, setDistanceOnMeterStick,"Measured at Set Depth","Distance (m)") #ONLY ONE FIDUCIAL
 #above and below measure the same thing in different ways
-plot_VS_TargetValue(depthDifference, depthBetweenFiducials,"Depth Between Fiducials","Distance (m)")
+plot_VS_TargetValue(depthDifference, depthBetweenFiducials,"Depth Between Fiducials","Distance (m)")#two fiducials
 
-plot_VS_TargetValue(relativeX, x_targetValue,"error in relative X","Distance (m)")
-plot_VS_TargetValue(relativeY, y_targetValue,"error in relative Y","Distance (m)")
-plot_VS_TargetValue(relativeZ, z_targetValue,"error in relative Z","Distance (m)")
+# see 3dTracking+Relative.py for relative tracking
+# plot_VS_TargetValue(relativeX, x_targetValue,"error in relative X","Distance (m)")
+# plot_VS_TargetValue(relativeY, y_targetValue,"error in relative Y","Distance (m)")
+# plot_VS_TargetValue(relativeZ, z_targetValue,"error in relative Z","Distance (m)")
 
 
 
