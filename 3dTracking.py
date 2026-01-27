@@ -13,6 +13,7 @@ def displayMetric(metric, value, unit="m"):
     cv2.putText(frame, metric+": " + str(value) + " "+unit, (50,numMetricDisplay*50),
         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
     numMetricDisplay+=1
+
 #helps make plots
 def plot_VS_TargetValue(graphData, targetValue, title, ylabel, tolerance_m=0.0005):
     graphData_error = [x-targetValue for x in graphData]
@@ -83,6 +84,13 @@ prev_pos = None
 
 running_mse = []
 frame_indices = []
+
+trackDepth=[]
+depthDifference=[]
+
+relativeX=[]
+relativeY=[]
+relativeZ=[]
 ####################################
 
 data_per_id = {}
@@ -106,13 +114,21 @@ while True:
         # Draw 2D green boxes and IDs
         cv2.aruco.drawDetectedMarkers(frame, corners)
 
+        twoDepthsHandler=[]#for collecting the depth of two fiducials 
+
         for i in range(len(ids)): # loops for every detected aruco
             # 5. Estimate 3D Pose using solvePnP
             _, rvec, tvec = cv2.solvePnP(obj_points, corners[i], mtx, dist, False, cv2.SOLVEPNP_IPPE_SQUARE)
             
             marker_id = int(ids[i][0])
             x, y, z = tvec.flatten()
-            
+
+            if(len(ids)==1):
+                trackDepth.append(z)
+            if(len(ids)==2):
+                twoDepthsHandler.append(z)
+
+
             ## printing rotation variables
             # rotationsVal=rvec.flatten()
             # displayMetric("id",ids[i])
@@ -123,6 +139,8 @@ while True:
 
             #rotations in degrees
             r1, r2, r3 = (rvec.flatten() * (180 / math.pi))
+
+
 
 
             ## Extract Position (Translation Vector)
@@ -188,7 +206,9 @@ while True:
 
             cv2.putText(frame, f"Size: {width_m:.3f}m", (center_x, center_y + 30),
             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-
+    
+        if twoDepthsHandler:
+            depthDifference.append(abs(twoDepthsHandler[1]-twoDepthsHandler[0]))
 
 
 
@@ -232,6 +252,7 @@ while True:
         error = abs(distance_3d - TRUE_DISTANCE)
         measured_distances.append(distance_3d)
         distance_errors.append(error)
+
 
         # RUNNING MS
         current_mse = np.mean(np.square(distance_errors))
@@ -306,7 +327,22 @@ df = pd.DataFrame(results)
 # plt.ylabel("dependent (unit)")
 # plt.show()
 #--------------------------------------------------------------------
+setDistanceOnMeterStick=0.5 #where the fiducial is on the meter stick in meters
+depthBetweenFiducials=0.5 #the distance bewteen fiducials, used for measuring depth in meters
+x_targetValue=0.5
+y_targetValue=0.5
+z_targetValue=0.5
+
 plot_VS_TargetValue(measured_distances,TRUE_DISTANCE+MARKER_SIZE,"Measured Distance Over Time","Distance (m)")
+plot_VS_TargetValue(trackDepth, setDistanceOnMeterStick,"Measured at Set Depth","Distance (m)") #ONLY ONE FIDUCIAL
+#above and below measure the same thing in different ways
+plot_VS_TargetValue(depthDifference, depthBetweenFiducials,"Depth Between Fiducials","Distance (m)")
+
+plot_VS_TargetValue(relativeX, x_targetValue,"error in relative X","Distance (m)")
+plot_VS_TargetValue(relativeY, y_targetValue,"error in relative Y","Distance (m)")
+plot_VS_TargetValue(relativeZ, z_targetValue,"error in relative Z","Distance (m)")
+
+
 
 
 # plt.plot(time_axis, velocities)
