@@ -5,12 +5,43 @@ import math
 import pandas as pd
 import os
 
+#----------helper functions
+#helps print on the camera feed
 numMetricDisplay=1
 def displayMetric(metric, value, unit="m"):
     global numMetricDisplay
     cv2.putText(frame, metric+": " + str(value) + " "+unit, (50,numMetricDisplay*50),
         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
     numMetricDisplay+=1
+#helps make plots
+def plot_VS_TargetValue(graphData, targetValue, title, ylabel, tolerance_m=0.0005):
+    graphData_error = [x-targetValue for x in graphData]
+    numOfMeasurements=range(len(graphData))
+    upper_bound = tolerance_m
+    lower_bound = -1 * tolerance_m
+    fig, ax = plt.subplots()
+    plt.plot(graphData_error)
+    # 2. Plot the target value line
+    ax.axhline(0, color='red', linestyle='--', linewidth=2, label='Target Value')
+
+    # 3. Plot the upper and lower tolerance lines (optional, can be done implicitly with fill_between)
+    ax.axhline(upper_bound, color='gray', linestyle=':', linewidth=1, label='Tolerance Limit')
+    ax.axhline(lower_bound, color='gray', linestyle=':', linewidth=1)
+
+    # 4. Shade the tolerance band
+    ax.fill_between(
+        numOfMeasurements,
+        lower_bound,
+        upper_bound,
+        color='red',
+        alpha=0.2, # Adjust transparency
+        label='Tolerance Range'
+    )
+    plt.title(title)
+    plt.xlabel("Frame Index")
+    plt.ylabel(ylabel)
+    plt.show()
+#---------------------
 
 # 1. Load Calibration Data
 with np.load('calibration_data2.npz') as data: #change directory if needed for testing
@@ -42,6 +73,7 @@ print("Starting detection. Press 'q' to exit.")
 
 TRUE_DISTANCE = 0.0581  # meters (change to marker spacing)
 
+################# Definitions of plotting arrays (not all used)
 measured_distances = []
 distance_errors = []
 
@@ -51,7 +83,7 @@ prev_pos = None
 
 running_mse = []
 frame_indices = []
-
+####################################
 
 data_per_id = {}
 TRUE_DY = 0.0  #relative to each other
@@ -74,13 +106,14 @@ while True:
         # Draw 2D green boxes and IDs
         cv2.aruco.drawDetectedMarkers(frame, corners)
 
-        for i in range(len(ids)):
+        for i in range(len(ids)): # loops for every detected aruco
             # 5. Estimate 3D Pose using solvePnP
             _, rvec, tvec = cv2.solvePnP(obj_points, corners[i], mtx, dist, False, cv2.SOLVEPNP_IPPE_SQUARE)
             
             marker_id = int(ids[i][0])
             x, y, z = tvec.flatten()
             
+            ## printing rotation variables
             # rotationsVal=rvec.flatten()
             # displayMetric("id",ids[i])
             # displayMetric("r1",rotationsVal[0]*(180/math.pi),"")
@@ -92,7 +125,7 @@ while True:
             r1, r2, r3 = (rvec.flatten() * (180 / math.pi))
 
 
-            # Extract Position (Translation Vector)
+            ## Extract Position (Translation Vector)
             # x, y, z = tvec.flatten()
             # displayMetric("x",x)
             # displayMetric("y",y)
@@ -193,6 +226,8 @@ while True:
         # Draw a line between the two markers
         #cv2.line(frame, marker_centers[id1], marker_centers[id2], (0, 255, 255), 4)
 
+
+        ################ updating plotting variables that depend on two fiducials
         # Error tracking
         error = abs(distance_3d - TRUE_DISTANCE)
         measured_distances.append(distance_3d)
@@ -202,27 +237,8 @@ while True:
         current_mse = np.mean(np.square(distance_errors))
         running_mse.append(current_mse)
         frame_indices.append(len(distance_errors))
- 
+        ############################################# 
 
-        # #Velocity tracking
-        # fps = cap.get(cv2.CAP_PROP_FPS) #gets the frames per sec
-
-        # if fps != 0:    #calculates time between frames
-        #     dt = 1 / fps
-        # else:  
-        #     print("if didn't report fps right then just assume 30fps")
-        #     dt = 1/30
-        
-        # # choose marker 1 for velocity
-        # p = p1
-
-        # if prev_pos is not None:
-        #     vel_vec = (p - prev_pos) / dt  #velocity vector (dif in position / time)
-        #     vel_mag = np.linalg.norm(vel_vec) #convert velocity vector into a scalar speed (magnitude)
-        #     velocities.append(vel_mag)
-
-        # prev_pos = p
-        # step = 50
         
 
         displayMetric("distance",round(distance_3d, 4))
@@ -275,73 +291,22 @@ df = pd.DataFrame(results)
 
 # If openpyxl isn't installed, run:
 # pip install openpyxl
-with pd.ExcelWriter("mse_results.xlsx", engine="openpyxl") as writer:
-    df.to_excel(writer, sheet_name="Final_MSE_Per_ID", index=False)
-    df_mse_time.to_excel(writer, sheet_name="Running_MSE", index=False)
+# with pd.ExcelWriter("mse_results.xlsx", engine="openpyxl") as writer:
+#     df.to_excel(writer, sheet_name="Final_MSE_Per_ID", index=False)
+#     df_mse_time.to_excel(writer, sheet_name="Running_MSE", index=False)
 
-print("Saved running MSE and final MSE to mse_results.xlsx")
-
-
-
-# # RMSE CALCULATIONS
-# rmse_dist = np.sqrt(np.mean(np.square(distance_errors))) #how far off distance estimates usually are(spacial accuracy)
-
-# # Only compute velocity RMSE if errors exist
-# if len(velocity_errors) > 0:
-#     rmse_vel = np.sqrt(np.mean(np.square(velocity_errors)))  #how far off velocity estimates usually are(motion accuracy)
-# else:
-#     rmse_vel = None
-
-# time_axis = np.arange(len(velocities)) * dt
+# print("Saved running MSE and final MSE to mse_results.xlsx")
 
 
-# #all the error and velocity stats
-# print("Distance stats:")
-# print("Mean Distance:", np.mean(measured_distances))
-# print("Std Dev:", np.std(measured_distances))
-# print("Max Distance:", np.max(measured_distances))
-# print("Min Distance:", np.min(measured_distances))
 
-# print("Velocity stats:")
-# print("Mean Speed:", np.mean(velocities))
-# print("Std Dev:", np.std(velocities))
-# print("Max Speed:", np.max(velocities))
-
-# print("measured_distance")
-# print(measured_distances)
-# print("time_axis")
-# print(time_axis)
-# print("velocities")
-# print(velocities)
-
-# plot cast
-numOfMeasurements=range(len(measured_distances))
-targetValue=TRUE_DISTANCE+MARKER_SIZE
-tolerance = 0.0005
-upper_bound = targetValue + tolerance
-lower_bound = targetValue - tolerance
-fig, ax = plt.subplots()
-plt.plot(measured_distances)
-# 2. Plot the target value line
-ax.axhline(targetValue, color='red', linestyle='--', linewidth=2, label='Target Value')
-
-# 3. Plot the upper and lower tolerance lines (optional, can be done implicitly with fill_between)
-ax.axhline(upper_bound, color='gray', linestyle=':', linewidth=1, label='Tolerance Limit')
-ax.axhline(lower_bound, color='gray', linestyle=':', linewidth=1)
-
-# 4. Shade the tolerance band
-ax.fill_between(
-    numOfMeasurements,
-    lower_bound,
-    upper_bound,
-    color='red',
-    alpha=0.2, # Adjust transparency
-    label='Tolerance Range'
-)
-plt.title("Measured Distance Over Time")
-plt.xlabel("Frame Index")
-plt.ylabel("Distance (m)")
-plt.show()
+#-------------------simple data plot template-----------------------
+# plt.plot(arrayOfRecordedValues)
+# plt.title("title")
+# plt.xlabel("frame")
+# plt.ylabel("dependent (unit)")
+# plt.show()
+#--------------------------------------------------------------------
+plot_VS_TargetValue(measured_distances,TRUE_DISTANCE+MARKER_SIZE,"Measured Distance Over Time","Distance (m)")
 
 
 # plt.plot(time_axis, velocities)
