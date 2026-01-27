@@ -53,6 +53,7 @@ print("RealSense intrinsics loaded")
 # ---- DATA STORAGE ----
 results = []
 frame_count = 0
+error_history = []
 
 # Main loop
 try:
@@ -88,7 +89,10 @@ try:
                 cy_px = int(np.mean(c[:, 1]))
 
                 z_rs = depth_frame.get_distance(cx_px, cy_px)
-
+                
+                error = abs(z_pnp - z_rs)
+                error_history.append(error)
+                running_mse = np.mean(np.square(error_history))
                 # marker size in pixels
                 width_px = int(abs(c[0][0] - c[1][0]))
                 height_px = int(abs(c[0][1] - c[3][1]))
