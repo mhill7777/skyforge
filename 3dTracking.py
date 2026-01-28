@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import pandas as pd
-import os
 
 #----------helper functions
 #helps print on the camera feed
