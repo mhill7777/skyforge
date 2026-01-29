@@ -44,7 +44,8 @@ def plot_VS_TargetValue(graphData, targetValue, title, ylabel, tolerance_m=0.000
 #---------------------
 
 # 1. Load Calibration Data
-with np.load('calibration_data2.npz') as data: #change directory if needed for testing
+fileName='calibration_data2.npz'
+with np.load(fileName) as data: #change directory if needed for testing
     mtx = data['mtx']
     dist = data['dist']
 
@@ -307,7 +308,7 @@ with open("results.txt", "w") as f:
 # -----------------------------
 # 10. Save MSE to Excel
 # -----------------------------
-df = pd.DataFrame(results)
+# df = pd.DataFrame(results)
 
 # If openpyxl isn't installed, run:
 # pip install openpyxl

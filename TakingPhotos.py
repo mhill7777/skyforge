@@ -3,7 +3,7 @@ import os # Import the operating system module
 
 # Define the desired save directory
 save_directory = "../CalibrationImages" # <-- CHANGE THIS to your desired path
-imageNum=39
+imageNum=0 # starting value
  
 
 # Ensure the directory exists before trying to save

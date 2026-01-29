@@ -5,5 +5,7 @@ dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
 board = cv2.aruco.CharucoBoard((9, 6), 24/900, 0.02, dictionary)
 
 # Generate image to print (e.g., 1000x700 pixels)
-img = board.generateImage((1000, 700))
-cv2.imwrite("my_charuco_boardx4.png", img)
+pixelsLong=1000
+pixelsTall=700
+img = board.generateImage((pixelsLong, pixelsTall))
+cv2.imwrite("my_charuco_board.png", img)
