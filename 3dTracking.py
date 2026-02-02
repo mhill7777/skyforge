@@ -54,8 +54,9 @@ frame_indices = []
 
 
 data_per_id = {}
-TRUE_DY = 0.0  #relative to each other
-TRUE_DZ = 0.0  #relative to each other
+True_DX = 0.0581 #relative to fiducals
+TRUE_DY = 0.0  #relative to fiducals
+TRUE_DZ = 0.0  #relative to fiducals
 
 while True:
     numMetricDisplay=1  #for printing information on their own rows
