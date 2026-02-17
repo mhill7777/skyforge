@@ -3,6 +3,7 @@ import numpy as np
 import os
 
 # --- 1. SETTINGS ---
+fileName = "calibration_data"
 # Use the exact dimensions you used to print your board
 CHARUCO_BOARD = cv2.aruco.CharucoBoard(
     size=(9, 6),          # Number of squares (width, height)
@@ -53,7 +54,7 @@ if len(all_charuco_corners) > 10:
     print(f"Calibration Complete. Reprojection Error: {ret:.4f}")
     
     # Save the parameters for your ArUco detection script
-    np.savez("calibration_data2.npz", mtx=mtx, dist=dist)
+    np.savez(fileName+".npz", mtx=mtx, dist=dist)
     print("Files saved to 'calibration_data2.npz'")
 else:
     print("Error: Not enough valid images found for calibration.")

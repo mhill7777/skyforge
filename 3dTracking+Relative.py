@@ -7,7 +7,9 @@ import easyGraphing as eg
 
 
 ################
-plot_offsetZ=eg.dataGrapher("z-offset","frame", "z-offset (mm)")
+plot_offsetZ=eg.dataGrapher("z-offset","frame index", "z-offset (mm)")
+plot_offsetX=eg.dataGrapher("X-offset","frame index", "x-offset (mm)")
+plot_offsetY=eg.dataGrapher("y-offset","frame index", "y-offset (mm)")
 ################
 
 numMetricDisplay=1
@@ -126,6 +128,8 @@ while True:
             displayMetric("y-offset (green)",round(t_rel[1], 4)*1000,"mm")
             displayMetric("z-offset (blue)",round(t_rel[2], 4)*1000,"mm")
             plot_offsetZ.append(t_rel[2]*1000)
+            plot_offsetX.append(t_rel[0]*1000)
+            plot_offsetY.append(t_rel[1]*1000)
 
             # print(f"Relative Translation (Marker 2 relative to Marker 1):\n{t_rel}")
             # print(f"Relative Rotation Vector (Marker 2 relative to Marker 1):\n{rvec_rel}")
@@ -159,9 +163,24 @@ cap.release()
 cv2.destroyAllWindows()
 
 ######################
-plot_offsetZ.graph()
-averageVal=np.mean(plot_offsetZ.dataList)
-print(averageVal)
-plt.axhline(y=averageVal, color='r', linestyle='--', linewidth=2)
-plt.show()
+# plot_offsetZ.graph()
+# averageVal=np.mean(plot_offsetZ.dataList)
+# print(averageVal)
+# plt.axhline(y=averageVal, color='r', linestyle='--', linewidth=2)
+# plt.show()
 ######################
+
+
+#######
+#use aruco 67 and 89
+#it will crash if a diffent fiducial is detected
+
+
+x_targetValue=500#these are in millimeters
+y_targetValue=500
+z_targetValue=500
+
+plot_offsetZ.plot_VS_TargetValue(x_targetValue,0.5)
+plot_offsetX.plot_VS_TargetValue(y_targetValue,0.5)
+plot_offsetY.plot_VS_TargetValue(z_targetValue,0.5)
+

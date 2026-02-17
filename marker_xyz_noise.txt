@@ -1,0 +1,65 @@
+Marker 67 stats:
+  x -> min: -0.1633, max: -0.1628, mean: -0.1632, std: 0.0002
+  y -> min: 0.0159, max: 0.0167, mean: 0.0161, std: 0.0003
+  z -> min: 2.5506, max: 2.5598, mean: 2.5580, std: 0.0036
+
+Marker 67 stats:
+  x -> min: -0.1708, max: -0.1708, mean: -0.1708, std: 0.0000
+  y -> min: 0.0172, max: 0.0172, mean: 0.0172, std: 0.0000
+  z -> min: 2.7852, max: 2.7852, mean: 2.7852, std: 0.0000
+
+Marker 67 stats:
+  x -> min: -0.1464, max: -0.1464, mean: -0.1464, std: 0.0000
+  y -> min: 0.0159, max: 0.0159, mean: 0.0159, std: 0.0000
+  z -> min: 2.5588, max: 2.5588, mean: 2.5588, std: 0.0000
+
+Marker 67 stats:
+  x -> min: -0.1421, max: -0.1421, mean: -0.1421, std: 0.0000
+  y -> min: 0.0159, max: 0.0159, mean: 0.0159, std: 0.0000
+  z -> min: 2.5585, max: 2.5585, mean: 2.5585, std: 0.0000
+
+Marker 67 stats:
+  x -> min: -0.1479, max: -0.1399, mean: -0.1474, std: 0.0018
+  y -> min: 0.0152, max: 0.0172, mean: 0.0171, std: 0.0005
+  z -> min: 2.6373, max: 2.7852, mean: 2.7774, std: 0.0330
+
+Marker 67 stats:
+  x -> min: -0.1433, max: -0.1356, mean: -0.1427, std: 0.0020
+  y -> min: 0.0152, max: 0.0172, mean: 0.0171, std: 0.0005
+  z -> min: 2.6373, max: 2.7852, mean: 2.7741, std: 0.0390
+
+Marker 67 stats:
+  x -> min: -0.1387, max: -0.1257, mean: -0.1315, std: 0.0034
+  y -> min: 0.0136, max: 0.0172, mean: 0.0152, std: 0.0010
+  z -> min: 2.5443, max: 2.7852, mean: 2.6424, std: 0.0686
+
+Marker 67 stats:
+  x -> min: -0.1243, max: -0.1243, mean: -0.1243, std: 0.0000
+  y -> min: 0.0153, max: 0.0153, mean: 0.0153, std: 0.0000
+  z -> min: 2.6513, max: 2.6513, mean: 2.6513, std: 0.0000
+
+Marker 67 stats:
+  x -> min: -0.1199, max: -0.1146, mean: -0.1153, std: 0.0018
+  y -> min: 0.0135, max: 0.0153, mean: 0.0138, std: 0.0006
+  z -> min: 2.5308, max: 2.6513, mean: 2.5459, std: 0.0398
+
+Marker 67 stats:
+  x -> min: -0.1104, max: -0.1104, mean: -0.1104, std: 0.0000
+  y -> min: 0.0137, max: 0.0137, mean: 0.0137, std: 0.0000
+  z -> min: 2.5534, max: 2.5534, mean: 2.5534, std: 0.0000
+
+Marker 67 stats:
+  x -> min: -0.1061, max: -0.1061, mean: -0.1061, std: 0.0000
+  y -> min: 0.0137, max: 0.0137, mean: 0.0137, std: 0.0000
+  z -> min: 2.5534, max: 2.5534, mean: 2.5534, std: 0.0000
+
+Marker 67 stats:
+  x -> min: -0.1047, max: -0.1019, mean: -0.1032, std: 0.0014
+  y -> min: 0.0137, max: 0.0153, mean: 0.0144, std: 0.0008
+  z -> min: 2.5534, max: 2.6519, mean: 2.5977, std: 0.0490
+
+Marker 67 stats:
+  x -> min: -0.1003, max: -0.0947, mean: -0.0971, std: 0.0022
+  y -> min: 0.0136, max: 0.0153, mean: 0.0143, std: 0.0008
+  z -> min: 2.5308, max: 2.6518, mean: 2.5797, std: 0.0508
+

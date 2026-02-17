@@ -1,10 +1,15 @@
-ID 89 Errors:
-  Mean X Error: 0.0612 m
-  Mean Y Error: 0.0632 m
-  Mean Z Error: 0.0336 m
+ID 31 Errors:
+  Mean X Error: nan m
+  Mean Y Error: nan m
+  Mean Z Error: nan m
 
 ID 67 Errors:
-  Mean X Error: 0.0612 m
-  Mean Y Error: 0.0632 m
-  Mean Z Error: 0.0336 m
+  Mean X Error: 0.3369 m
+  Mean Y Error: 0.1321 m
+  Mean Z Error: 0.2251 m
+
+ID 89 Errors:
+  Mean X Error: 0.3369 m
+  Mean Y Error: 0.1321 m
+  Mean Z Error: 0.2251 m
 

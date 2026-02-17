@@ -1,0 +1,234 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+import pandas as pd
+import os
+import pyrealsense2 as rs
+import time
+
+numMetricDisplay = 1
+def displayMetric(metric, value, unit="m"):
+    global numMetricDisplay
+    cv2.putText(frame, metric + ": " + str(value) + " " + unit,
+                (50, numMetricDisplay * 50),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    numMetricDisplay += 1
+
+
+# Start RealSense + Get Intrinsics
+
+pipeline = rs.pipeline()
+config = rs.config()
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+
+profile = pipeline.start(config)
+
+# Align depth to color
+align = rs.align(rs.stream.color)
+
+color_profile = profile.get_stream(rs.stream.color)
+intr = color_profile.as_video_stream_profile().get_intrinsics()
+
+mtx = np.array([
+    [intr.fx, 0, intr.ppx],
+    [0, intr.fy, intr.ppy],
+    [0, 0, 1]
+])
+dist = np.array(intr.coeffs)
+
+print("Using RealSense intrinsics:")
+print(mtx)
+print(dist)
+
+
+# Setup ArUco Detector
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+parameters = cv2.aruco.DetectorParameters()
+detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+
+# Define Physical Marker Geometry
+MARKER_SIZE = 0.05057  # meters
+obj_points = np.array([
+    [-MARKER_SIZE / 2,  MARKER_SIZE / 2, 0],
+    [ MARKER_SIZE / 2,  MARKER_SIZE / 2, 0],
+    [ MARKER_SIZE / 2, -MARKER_SIZE / 2, 0],
+    [-MARKER_SIZE / 2, -MARKER_SIZE / 2, 0]
+], dtype=np.float32)
+
+
+print("Starting detection. Press 'q' to exit.")
+
+# Error + Tracking Setup
+TRUE_DISTANCE = 0.0581
+
+measured_distances = []
+distance_errors = []
+running_mse = []
+frame_indices = []
+
+data_per_id = {}
+
+# Main Loop
+while True:
+    numMetricDisplay = 1
+
+    frames = pipeline.wait_for_frames()
+    frames = align.process(frames)  # align depth to color
+    color_frame = frames.get_color_frame()
+    depth_frame = frames.get_depth_frame()
+    if not color_frame or not depth_frame:
+        continue
+
+    frame = np.asanyarray(color_frame.get_data())
+
+    corners, ids, rejected = detector.detectMarkers(frame)
+
+    marker_positions = {}
+    marker_centers = {}
+
+    if ids is not None:
+        cv2.aruco.drawDetectedMarkers(frame, corners)
+
+        for i in range(len(ids)):
+            # SolvePnP for full 6-DoF pose
+            _, rvec, tvec = cv2.solvePnP(
+                obj_points,
+                corners[i],
+                mtx,
+                dist,
+                False,
+                cv2.SOLVEPNP_IPPE_SQUARE
+            )
+
+            marker_id = int(ids[i][0])
+            x, y, z_pnp = tvec.flatten()
+            r1, r2, r3 = rvec.flatten() * (180 / math.pi)
+
+            # Get depth measurement at marker center
+            c = corners[i][0]
+            center_x = int(np.mean(c[:, 0]))
+            center_y = int(np.mean(c[:, 1]))
+            z_depth = depth_frame.get_distance(center_x, center_y)
+
+            # Fuse solvePnP and depth (weighted average)
+            alpha = 0.7  # weight for solvePnP
+            z_fused = alpha * z_pnp + (1 - alpha) * z_depth
+            tvec[2][0] = z_fused
+            z = z_fused
+
+            print(f"ID {marker_id} | r1={r1:.3f}° r2={r2:.3f}° r3={r3:.3f}°")
+            print(f"ID {marker_id} | Pos (m): X={x:.3f}, Y={y:.3f}, Z={z:.3f}\n")
+
+            marker_positions[marker_id] = np.array([x, y, z])
+
+            if marker_id not in data_per_id:
+                data_per_id[marker_id] = {
+                    "x_err": [], "y_err": [], "z_err": []
+                }
+
+            # Draw 3D axes
+            cv2.drawFrameAxes(frame, mtx, dist, rvec, tvec, 0.03)
+
+            marker_centers[marker_id] = (center_x, center_y)
+            width_px = np.linalg.norm(c[0] - c[1])
+            fx = mtx[0, 0]
+            width_m = (width_px * z) / fx
+
+            cv2.putText(frame, f"ID: {marker_id}", (center_x, center_y - 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+            cv2.putText(frame, f"Z: {z:.2f} m", (center_x, center_y + 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+            cv2.putText(frame, f"Size: {width_m:.3f} m", (center_x, center_y + 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+
+    if len(marker_positions) >= 2:
+        ids_list = list(marker_positions.keys())
+        id1, id2 = ids_list[0], ids_list[1]
+
+        p1 = marker_positions[id1]
+        p2 = marker_positions[id2]
+
+        dx, dy, dz = p2 - p1
+        distance_3d = np.linalg.norm([dx, dy, dz])
+
+        data_per_id[id1]["x_err"].append(abs(dx - TRUE_DISTANCE))
+        data_per_id[id2]["x_err"].append(abs(dx - TRUE_DISTANCE))
+
+        error = abs(distance_3d - TRUE_DISTANCE)
+        measured_distances.append(distance_3d)
+        distance_errors.append(error)
+
+        running_mse.append(np.mean(np.square(distance_errors)))
+        frame_indices.append(len(distance_errors))
+
+        displayMetric("distance", round(distance_3d, 4))
+
+
+    cv2.imshow("ArUco 3D Tracking (RealSense)", frame)
+    key = cv2.waitKey(1) & 0xFF
+
+    # Quit
+    if key == ord('q'):
+        break
+    if key == ord('p'):
+        sample_duration = 5  # seconds
+        sample_interval = 0.1  # seconds between frames
+        start_time = time.time()
+        
+        samples_per_marker = {}  # dictionary to hold x, y, z samples
+
+        print("Sampling positions for 5 seconds...")
+
+        while time.time() - start_time < sample_duration:
+            frames = pipeline.wait_for_frames()
+            frames = align.process(frames)
+            color_frame = frames.get_color_frame()
+            depth_frame = frames.get_depth_frame()
+            if not color_frame or not depth_frame:
+                continue
+
+            frame = np.asanyarray(color_frame.get_data())
+            corners, ids, _ = detector.detectMarkers(frame)
+
+            if ids is not None:
+                for i, marker_id_array in enumerate(ids):
+                    marker_id = int(marker_id_array[0])
+                    c = corners[i][0]
+                    center_x = int(np.mean(c[:, 0]))
+                    center_y = int(np.mean(c[:, 1]))
+
+                    # Use SolvePnP or depth for 3D position
+                    _, rvec, tvec = cv2.solvePnP(
+                        obj_points,
+                        corners[i],
+                        mtx,
+                        dist,
+                        False,
+                        cv2.SOLVEPNP_IPPE_SQUARE
+                    )
+                    x, y, z = tvec.flatten()
+
+                    if marker_id not in samples_per_marker:
+                        samples_per_marker[marker_id] = {"x": [], "y": [], "z": []}
+                    
+                    samples_per_marker[marker_id]["x"].append(x)
+                    samples_per_marker[marker_id]["y"].append(y)
+                    samples_per_marker[marker_id]["z"].append(z)
+
+            time.sleep(sample_interval)
+
+        # After sampling, calculate stats and save
+        with open("marker_xyz_noise.txt", "a") as f:
+            for marker_id, axes in samples_per_marker.items():
+                f.write(f"Marker {marker_id} stats:\n")
+                for axis in ["x", "y", "z"]:
+                    data = np.array(axes[axis])
+                    f.write(f"  {axis} -> min: {data.min():.4f}, max: {data.max():.4f}, mean: {data.mean():.4f}, std: {data.std():.4f}\n")
+                    print(f"Marker {marker_id} | {axis} -> min: {data.min():.4f}, max: {data.max():.4f}, mean: {data.mean():.4f}, std: {data.std():.4f}")
+                f.write("\n")
+        print("Sampling complete and saved to marker_xyz_noise.txt")
+pipeline.stop()
+cv2.destroyAllWindows()
